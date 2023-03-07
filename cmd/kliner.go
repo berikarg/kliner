@@ -89,7 +89,7 @@ func getExtendedKlines(pair string, tf models.TimeFrame, startDate, endDate int)
 }
 
 func getVWAP(kline models.KLine, pair string, tf models.TimeFrame) (decimal.Decimal, error) {
-	lowerTf, err := getLowerTimeFrame(tf)
+	lowerTf, err := models.GetLowerTimeFrame(tf)
 	if err != nil {
 		return decimal.Decimal{}, errors.Wrap(err, "get lower time frame")
 	}
@@ -107,17 +107,4 @@ func getVWAP(kline models.KLine, pair string, tf models.TimeFrame) (decimal.Deci
 	}
 	//VWAP = ∑ (Typical Price * Volume ) / ∑ Volume
 	return typicalPriceTimesVolumeSum.Div(volumeSum), nil
-}
-
-func getLowerTimeFrame(interval models.TimeFrame) (models.TimeFrame, error) {
-	switch interval {
-	case models.Week:
-		return models.Day, nil
-	case models.Day:
-		return models.Hour, nil
-	case models.Hour:
-		return models.Minute, nil
-	default:
-		return "", errors.New("invalid timeframe")
-	}
 }

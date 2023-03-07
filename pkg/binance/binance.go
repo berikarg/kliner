@@ -13,7 +13,6 @@ import (
 )
 
 func GetKLines(pair string, interval models.TimeFrame, startTime, endTime int) ([]models.KLine, error) {
-	path := "https://api.binance.com/api/v3/klines"
 	values := url.Values{}
 	values.Set("symbol", pair)
 	values.Set("interval", string(interval))
@@ -23,7 +22,7 @@ func GetKLines(pair string, interval models.TimeFrame, startTime, endTime int) (
 	}
 	values.Set("limit", "1000")
 
-	path = (&url.URL{
+	path := (&url.URL{
 		Scheme:   "https",
 		Host:     "api.binance.com",
 		Path:     "api/v3/klines",
