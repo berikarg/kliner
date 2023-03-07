@@ -1,0 +1,6 @@
+crypto_pairs:
+  - BTCUSDT
+  - ETHUSDT
+start_date: 1514764800000
+end_date: 1640995200000
+time_frame: 1d
