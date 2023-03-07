@@ -15,4 +15,5 @@ type KLine struct {
 type KLineExtended struct {
 	KLine
 	VWAP decimal.Decimal //Volume Weighted Average Price
+	RSI  decimal.Decimal
 }

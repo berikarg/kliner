@@ -15,6 +15,8 @@ import (
 
 var configPath = flag.String("c", "./configs/config.yml", "config file path")
 
+const rsiPeriods = 14
+
 func main() {
 	flag.Parse()
 	cfg, err := config.New(*configPath)
@@ -51,6 +53,7 @@ func fillKlinesInCSV(pair string, cfg *config.Config) error {
 		err = writer.Write([]string{
 			openTime.Format("2006-01-02"),
 			kline.VWAP.String(),
+			kline.RSI.String(),
 			kline.HighPrice.String(),
 			kline.LowPrice.String(),
 			kline.ClosePrice.String(),
@@ -75,14 +78,27 @@ func getExtendedKlines(pair string, tf models.TimeFrame, startDate, endDate int)
 		startDate = klines[len(klines)-1].CloseTime
 	}
 	kLinesExtended := make([]models.KLineExtended, 0, len(allKlines))
-	for _, kline := range allKlines {
+	lastAvgUp, lastAvgDown := decimal.NewFromInt(-1), decimal.Zero
+	for i, kline := range allKlines {
+		if i < rsiPeriods+1 {
+			continue
+		}
 		vwap, err := getVWAP(kline, pair, tf)
 		if err != nil {
 			return nil, err
 		}
+
+		rsi, err := getRSI(allKlines[i-rsiPeriods+1:i+1], lastAvgUp, lastAvgDown)
+		if err != nil {
+			return nil, err
+		}
+		lastAvgUp = rsi[1]
+		lastAvgDown = rsi[2]
+
 		kLinesExtended = append(kLinesExtended, models.KLineExtended{
 			KLine: kline,
 			VWAP:  vwap,
+			RSI:   rsi[0],
 		})
 	}
 	return kLinesExtended, nil
@@ -107,4 +123,50 @@ func getVWAP(kline models.KLine, pair string, tf models.TimeFrame) (decimal.Deci
 	}
 	//VWAP = ∑ (Typical Price * Volume ) / ∑ Volume
 	return typicalPriceTimesVolumeSum.Div(volumeSum), nil
+}
+
+func getRSI(klines []models.KLine, lastAvgU, lastAvgD decimal.Decimal) ([3]decimal.Decimal, error) {
+	if lastAvgU.IsNegative() {
+		return getFirstRSI(klines), nil
+	}
+	diff := klines[len(klines)-1].ClosePrice.Sub(klines[len(klines)-2].ClosePrice)
+	currUp, currDown := decimal.Zero, decimal.Zero
+	if diff.IsNegative() {
+		currDown = diff.Abs()
+	} else {
+		currUp = diff
+	}
+	one := decimal.NewFromInt(1)
+	N := decimal.NewFromInt(rsiPeriods)
+	//avgU = (lastAvgU*(N-1) + currUp) / N
+	avgU := lastAvgU.Mul(N.Sub(one)).Add(currUp).Div(N)
+	avgD := lastAvgD.Mul(N.Sub(one)).Add(currDown).Div(N)
+	rs := avgU.Div(avgD)
+	hundred := decimal.NewFromInt(100)
+	//RSI = 100 – 100 / ( 1 + RS )
+	return [3]decimal.Decimal{hundred.Sub(hundred.Div(rs.Add(one))), avgU, avgD}, nil
+}
+
+// getFirstRSI returns rsi, avg up and avg down for the first iteration
+func getFirstRSI(klines []models.KLine) [3]decimal.Decimal {
+	ups := make([]decimal.Decimal, 0, len(klines))
+	downs := make([]decimal.Decimal, 0, len(klines))
+	for i := 1; i < len(klines); i++ {
+		diff := klines[i].ClosePrice.Sub(klines[i-1].ClosePrice)
+		if diff.IsNegative() {
+			ups = append(ups, decimal.Zero)
+			downs = append(downs, diff.Abs())
+		} else {
+			ups = append(ups, diff)
+			downs = append(downs, decimal.Zero)
+		}
+	}
+	//AvgU = sum of all up moves (U) in the last N bars divided by N
+	avgU := decimal.Avg(ups[0], ups...)
+	avgD := decimal.Avg(downs[0], downs...)
+	rs := avgU.Div(avgD)
+	hundred := decimal.NewFromInt(100)
+	one := decimal.NewFromInt(1)
+	//RSI = 100 – 100 / ( 1 + RS )
+	return [3]decimal.Decimal{hundred.Sub(hundred.Div(rs.Add(one))), avgU, avgD}
 }
