@@ -54,6 +54,7 @@ func fillKlinesInCSV(pair string, cfg *config.Config) error {
 			openTime.Format("2006-01-02"),
 			kline.VWAP.String(),
 			kline.RSI.String(),
+			kline.OpenPrice.String(),
 			kline.HighPrice.String(),
 			kline.LowPrice.String(),
 			kline.ClosePrice.String(),

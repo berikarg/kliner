@@ -43,7 +43,7 @@ func main() {
 	header := []string{"Date"}
 	for _, fileName := range csvList {
 		symbol := strings.TrimRight(fileName, "USDT.csv")
-		header = append(header, symbol+"_VWAP", symbol+"_RSI", symbol+"_high", symbol+"_low", symbol+"_close", symbol+"_volume")
+		header = append(header, symbol+"_VWAP", symbol+"_RSI", symbol+"_open", symbol+"_high", symbol+"_low", symbol+"_close", symbol+"_volume")
 	}
 	err = writer.Write(header)
 	if err != nil {
