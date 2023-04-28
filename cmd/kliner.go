@@ -24,17 +24,22 @@ func main() {
 		log.Fatal(err.Error())
 	}
 	for _, pair := range cfg.CryptoPairs {
-		err = fillKlinesInCSV(pair, cfg)
+		klines, err := getExtendedKlines(pair, cfg.TimeFrame, cfg.StartDate, cfg.EndDate)
+		if err != nil {
+			log.Println(err)
+			continue
+		}
+		err = fillKlinesInCSV(pair, klines)
 		if err != nil {
 			log.Fatal(err.Error())
 		}
 	}
 }
 
-func fillKlinesInCSV(pair string, cfg *config.Config) error {
+func fillKlinesInCSV(pair string, klines []models.KLineExtended) error {
 	csvFile, err := os.OpenFile(pair+".csv", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 	if err != nil {
-		log.Fatal(err.Error())
+		return err
 	}
 	defer func() {
 		err = csvFile.Close()
@@ -43,10 +48,6 @@ func fillKlinesInCSV(pair string, cfg *config.Config) error {
 		}
 	}()
 	writer := csv.NewWriter(csvFile)
-	klines, err := getExtendedKlines(pair, cfg.TimeFrame, cfg.StartDate, cfg.EndDate)
-	if err != nil {
-		log.Fatal(err.Error())
-	}
 	for _, kline := range klines {
 		openTime := time.UnixMilli(int64(kline.OpenTime))
 
