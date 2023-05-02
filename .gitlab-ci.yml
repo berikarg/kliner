@@ -1,7 +1,8 @@
 stages:
-  - changelog
+  - generate_changelog
 
 changelog:
+  stage: generate_changelog
   image: registry.gitlab.com/gitlab-org/gitlab-ee-changelog-generator:latest
   script:
     - generate-changelog > CHANGELOG.md
