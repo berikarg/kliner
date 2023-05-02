@@ -1,13 +1,22 @@
 stages:
-  - generate_changelog
+  - test
+  - changelog
+
+test:
+  stage: test
+  script:
+    - go test -v ./...
 
 changelog:
-  stage: generate_changelog
-  image: registry.gitlab.com/gitlab-org/release-tools/gitlab-changelog:latest
+  stage: changelog
+  image: alpine:latest
   script:
-    - generate-changelog > CHANGELOG.md
+    - apk add --no-cache git curl
+    - curl -L https://github.com/git-chglog/git-chglog/releases/download/0.15.2/git-chglog_linux_amd64.tar.gz | tar xz
+    - mv git-chglog /usr/local/bin/
+    - git-chglog > changelog.md
   artifacts:
     paths:
       - CHANGELOG.md
-  only:
-    - tags
+#  only:
+#    - tags
