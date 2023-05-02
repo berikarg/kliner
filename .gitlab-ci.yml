@@ -1,0 +1,12 @@
+stages:
+  - changelog
+
+changelog:
+  image: registry.gitlab.com/gitlab-org/gitlab-ee-changelog-generator:latest
+  script:
+    - generate-changelog > CHANGELOG.md
+  artifacts:
+    paths:
+      - CHANGELOG.md
+  only:
+    - tags
