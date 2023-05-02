@@ -12,6 +12,8 @@ import (
 	"time"
 )
 
+// Same as csvmerger in directory above, but takes only close values
+
 var csvDir = flag.String("d", "csvs", "folder with csv files to merge")
 var startDateStr = flag.String("s", "2018-01-01", "start date in YYYY-MM-DD")
 var endDateStr = flag.String("e", "2022-01-01", "end date in YYYY-MM-DD")
