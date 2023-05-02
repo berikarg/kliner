@@ -31,6 +31,10 @@ func main() {
 		log.Fatal(err)
 	}
 
+	if endDate.Before(startDate) {
+		log.Fatal(err)
+	}
+
 	files, err := os.ReadDir(*csvDir)
 	if err != nil {
 		log.Fatal(err)
