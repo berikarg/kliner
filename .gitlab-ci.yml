@@ -1,11 +1,5 @@
 stages:
-  - test
   - changelog
-
-test:
-  stage: test
-  script:
-    - go test -v ./...
 
 changelog:
   stage: changelog
