@@ -12,6 +12,7 @@ type Config struct {
 	StartDate   int              `yaml:"start_date"`
 	EndDate     int              `yaml:"end_date"`
 	TimeFrame   models.TimeFrame `yaml:"time_frame"`
+	OutputDir   string           `yaml:"output_dir"`
 }
 
 func New(filepath string) (*Config, error) {

@@ -37,7 +37,7 @@ func main() {
 }
 
 func fillKlinesInCSV(pair string, klines []models.KLineExtended) error {
-	csvFile, err := os.OpenFile(pair+".csv", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+	csvFile, err := os.OpenFile("extended3105"+pair+".csv", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 	if err != nil {
 		return err
 	}
