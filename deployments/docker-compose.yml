@@ -1,0 +1,14 @@
+version: "3.9"
+
+services:
+  dev-db:
+    image: "postgres:latest"
+    container_name: "candles_db"
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=qwerty
+      - POSTGRES_DB=postgres
+    volumes:
+      - ../../.db/dev-postgres/data:/var/lib/postgresql/data

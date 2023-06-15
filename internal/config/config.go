@@ -13,6 +13,14 @@ type Config struct {
 	EndDate     int              `yaml:"end_date"`
 	TimeFrame   models.TimeFrame `yaml:"time_frame"`
 	OutputDir   string           `yaml:"output_dir"`
+	Database    Database         `yaml:"database"`
+}
+
+type Database struct {
+	User     string `yaml:"user"`
+	Password string `yaml:"password"`
+	Name     string `yaml:"name"`
+	Addr     string `yaml:"addr"`
 }
 
 func New(filepath string) (*Config, error) {
