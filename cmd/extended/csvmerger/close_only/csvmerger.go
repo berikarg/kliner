@@ -121,8 +121,13 @@ func getRecordsBetween(startDate, endDate time.Time, records [][]string) ([][]st
 		return nil, errors.New("endDate must be greater than or equal to startDate")
 	}
 
-	layout := "2006-01-02"
+	layout := "2006-01-02 15:04:05"
 	filteredRecords := make([][]string, 0)
+
+	timeDelta, err := getTimeDelta(records, layout)
+	if err != nil {
+		return nil, errors.Wrap(err, "get time delta")
+	}
 
 	expectedDate := startDate
 	recordIndex := 0
@@ -145,13 +150,28 @@ func getRecordsBetween(startDate, endDate time.Time, records [][]string) ([][]st
 		if recordDate.Equal(expectedDate) {
 			filteredRecords = append(filteredRecords, record)
 			recordIndex++
-			expectedDate = expectedDate.AddDate(0, 0, 1)
+			expectedDate = expectedDate.Add(timeDelta)
 		} else if recordDate.Before(expectedDate) {
 			recordIndex++
 		} else {
-			return nil, errors.New("some dates between startDate and endDate are missing")
+			expectedDate = expectedDate.Add(timeDelta)
+			fmt.Println("date is missing", recordDate.String())
 		}
 	}
 
 	return filteredRecords, nil
+}
+
+func getTimeDelta(records [][]string, layout string) (time.Duration, error) {
+	record1 := records[0]
+	record2 := records[1]
+	recordDate1, err := time.Parse(layout, record1[0])
+	if err != nil {
+		return 0, errors.Wrap(err, "error parsing date")
+	}
+	recordDate2, err := time.Parse(layout, record2[0])
+	if err != nil {
+		return 0, errors.Wrap(err, "error parsing date")
+	}
+	return recordDate2.Sub(recordDate1), nil
 }

@@ -64,7 +64,7 @@ func sendHTTPRequest(method, path string, headers map[string]string, body io.Rea
 		req.Header.Set(k, v)
 	}
 	client := &http.Client{
-		Timeout: 10 * time.Second,
+		Timeout: 60 * time.Second,
 	}
 	resp, err := client.Do(req)
 	if err != nil {

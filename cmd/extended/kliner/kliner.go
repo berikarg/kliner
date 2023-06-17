@@ -29,15 +29,15 @@ func main() {
 			log.Println(err)
 			continue
 		}
-		err = fillKlinesInCSV(pair, klines)
+		err = fillKlinesInCSV(pair, cfg.OutputDir, klines)
 		if err != nil {
 			log.Fatal(err.Error())
 		}
 	}
 }
 
-func fillKlinesInCSV(pair string, klines []models.KLineExtended) error {
-	csvFile, err := os.OpenFile("extended3105"+pair+".csv", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+func fillKlinesInCSV(pair, outputDir string, klines []models.KLineExtended) error {
+	csvFile, err := os.OpenFile(outputDir+"/"+pair+".csv", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 	if err != nil {
 		return err
 	}
@@ -52,7 +52,7 @@ func fillKlinesInCSV(pair string, klines []models.KLineExtended) error {
 		openTime := time.UnixMilli(int64(kline.OpenTime))
 
 		err = writer.Write([]string{
-			openTime.Format("2006-01-02"),
+			openTime.Format("2006-01-02 15:04:05"),
 			kline.VWAP.String(),
 			kline.RSI.String(),
 			kline.OpenPrice.String(),
@@ -107,6 +107,9 @@ func getExtendedKlines(pair string, tf models.TimeFrame, startDate, endDate int)
 }
 
 func getVWAP(kline models.KLine, pair string, tf models.TimeFrame) (decimal.Decimal, error) {
+	if kline.Volume.IsZero() {
+		return kline.ClosePrice, nil
+	}
 	lowerTf, err := models.GetLowerTimeFrame(tf)
 	if err != nil {
 		return decimal.Decimal{}, errors.Wrap(err, "get lower time frame")
