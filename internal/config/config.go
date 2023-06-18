@@ -2,6 +2,7 @@ package config
 
 import (
 	"github.com/pkg/errors"
+	"github.com/shopspring/decimal"
 	"gitlab.com/berik.argimbayev/kliner/internal/models"
 	"gopkg.in/yaml.v3"
 	"os"
@@ -14,6 +15,7 @@ type Config struct {
 	TimeFrame   models.TimeFrame `yaml:"time_frame"`
 	OutputDir   string           `yaml:"output_dir"`
 	Database    Database         `yaml:"database"`
+	Spread      Spread           `yaml:"spread"`
 }
 
 type Database struct {
@@ -21,6 +23,13 @@ type Database struct {
 	Password string `yaml:"password"`
 	Name     string `yaml:"name"`
 	Addr     string `yaml:"addr"`
+}
+
+type Spread struct {
+	Numerator   string          `yaml:"numerator"`
+	Denominator string          `yaml:"denominator"`
+	K           decimal.Decimal `yaml:"k"`
+	B           decimal.Decimal `yaml:"b"`
 }
 
 func New(filepath string) (*Config, error) {

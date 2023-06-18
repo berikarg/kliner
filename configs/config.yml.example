@@ -11,3 +11,9 @@ database:
   password: ""
   name: "postgres"
   addr: "localhost:5432"
+
+spread:
+  numerator: BTC
+  denominator: ETH
+  k: 1
+  b: 10

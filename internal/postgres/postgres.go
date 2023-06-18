@@ -40,3 +40,28 @@ func InsertCandle(db *sqlx.DB, candle models.CandleDB) error {
 	_, err := db.NamedExec(query, candle)
 	return err
 }
+
+func GetCandle(db *sqlx.DB, symbol, interval string, openTime time.Time) (models.CandleDB, error) {
+	query := `SELECT * FROM candles WHERE symbol = $1 AND interval = $2 AND open_time = $3;`
+	candle := models.CandleDB{}
+	err := db.Get(&candle, query, symbol, interval, openTime)
+	if err != nil {
+		return models.CandleDB{}, err
+	}
+	return candle, nil
+}
+
+func GetCandles(db *sqlx.DB, symbol, interval string, startTime, endTime time.Time) ([]models.CandleDB, error) {
+	query := `SELECT * FROM candles
+         WHERE symbol = $1
+         AND interval = $2
+         AND open_time >= $3
+         AND open_time < $4
+         ORDER BY open_time;`
+	var candles []models.CandleDB
+	err := db.Select(&candles, query, symbol, interval, startTime, endTime)
+	if err != nil {
+		return nil, err
+	}
+	return candles, nil
+}
