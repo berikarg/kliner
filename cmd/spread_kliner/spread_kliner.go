@@ -106,8 +106,8 @@ func calcSpreads(numCandles, denCandles []models.CandleDB, spread config.Spread)
 }
 
 func calcSpread(num, den decimal.Decimal, spread config.Spread) decimal.Decimal {
-	numLog := decimal.NewFromFloat(math.Log10(num.InexactFloat64()))
-	denLog := decimal.NewFromFloat(math.Log10(den.InexactFloat64()))
+	numLog := decimal.NewFromFloat(math.Log(num.InexactFloat64()))
+	denLog := decimal.NewFromFloat(math.Log(den.InexactFloat64()))
 	//log(NUM) - (k * log(DEN) + b)
 	return numLog.Sub(spread.K.Mul(denLog).Add(spread.B))
 }
