@@ -52,7 +52,7 @@ func main() {
 
 func constructKline(db *sqlx.DB, start time.Time, interval time.Duration, spread config.Spread) (models.CandleDB, error) {
 	if !isMinuteDataAvailable(db, start, spread.Numerator) || !isMinuteDataAvailable(db, start, spread.Denominator) {
-		return models.CandleDB{}, errors.New("data unavailable")
+		return models.CandleDB{}, errors.Errorf("%s data unavailable", start.String())
 	}
 	end := start.Add(interval)
 
