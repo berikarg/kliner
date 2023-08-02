@@ -25,10 +25,10 @@ func main() {
 		log.Fatal(err.Error())
 	}
 	for _, pair := range cfg.CryptoPairs {
-		lastOpenTime, err := postgres.GetLastOpenTime(db, pair, string(cfg.TimeFrame))
+		lastOpenTime, err := postgres.GetLastOpenTime(db, pair+"-F", string(cfg.TimeFrame))
 		if err != nil {
-			log.Println(err)
-			continue
+			log.Println(err, "use given start time")
+			lastOpenTime = time.UnixMilli(int64(cfg.StartDate)).Add(-time.Second) // sub one sec since it is going to be added
 		}
 		startTime := lastOpenTime.Add(time.Second) // should work for all candles (1m, 1d etc.)
 		err = getAndSaveKlines(db, pair, cfg.TimeFrame, int(startTime.UnixMilli()), cfg.EndDate)
@@ -41,7 +41,7 @@ func main() {
 
 func getAndSaveKlines(db *sqlx.DB, pair string, tf models.TimeFrame, startDate, endDate int) error {
 	for startDate < endDate {
-		klines, err := binance.GetKLines(pair, tf, startDate, endDate)
+		klines, err := binance.GetFuturesKLines(pair, tf, startDate, endDate)
 		if err != nil {
 			return err
 		}
@@ -59,6 +59,7 @@ func getAndSaveKlines(db *sqlx.DB, pair string, tf models.TimeFrame, startDate, 
 }
 
 func fillKlinesInDB(db *sqlx.DB, pair string, interval models.TimeFrame, klines []models.KLine) error {
+	pair += "-F"
 	for _, kline := range klines {
 		klineDb := models.CandleDB{
 			Symbol:   pair,

@@ -65,3 +65,17 @@ func GetCandles(db *sqlx.DB, symbol, interval string, startTime, endTime time.Ti
 	}
 	return candles, nil
 }
+
+func GetLastOpenTime(db *sqlx.DB, symbol, interval string) (time.Time, error) {
+	query := `SELECT open_time FROM candles
+				 WHERE symbol = $1
+				 AND interval = $2
+				 ORDER BY open_time DESC
+				 LIMIT 1;`
+	var openTime time.Time
+	err := db.Get(&openTime, query, symbol, interval)
+	if err != nil {
+		return time.Time{}, err
+	}
+	return openTime, nil
+}

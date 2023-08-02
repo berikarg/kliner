@@ -86,3 +86,45 @@ func sendHTTPRequest(method, path string, headers map[string]string, body io.Rea
 	}
 	return nil
 }
+
+func GetFuturesKLines(pair string, interval models.TimeFrame, startTime, endTime int) ([]models.KLine, error) {
+	values := url.Values{}
+	values.Set("symbol", pair)
+	values.Set("interval", string(interval))
+	values.Set("startTime", fmt.Sprintf("%d", startTime))
+	if endTime != 0 {
+		values.Set("endTime", fmt.Sprintf("%d", endTime))
+	}
+	values.Set("limit", "1500")
+
+	path := (&url.URL{
+		Scheme:   "https",
+		Host:     "fapi.binance.com",
+		Path:     "fapi/v1/klines",
+		RawQuery: values.Encode(),
+	}).String()
+
+	var resp [][]interface{}
+	err := sendHTTPRequest(http.MethodGet, path, nil, nil, &resp)
+	if err != nil {
+		return nil, errors.Wrap(err, "send public http request")
+	}
+	klines := make([]models.KLine, 0, len(resp))
+	for _, rec := range resp {
+		openPrice, _ := decimal.NewFromString(rec[1].(string))
+		highPrice, _ := decimal.NewFromString(rec[2].(string))
+		lowPrice, _ := decimal.NewFromString(rec[3].(string))
+		closePrice, _ := decimal.NewFromString(rec[4].(string))
+		volume, _ := decimal.NewFromString(rec[7].(string))
+		klines = append(klines, models.KLine{
+			OpenTime:   int(rec[0].(float64)),
+			OpenPrice:  openPrice,
+			HighPrice:  highPrice,
+			LowPrice:   lowPrice,
+			ClosePrice: closePrice,
+			Volume:     volume,
+			CloseTime:  int(rec[6].(float64)),
+		})
+	}
+	return klines, nil
+}
