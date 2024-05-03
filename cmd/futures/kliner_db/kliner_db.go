@@ -27,7 +27,7 @@ func main() {
 	for _, pair := range cfg.CryptoPairs {
 		lastOpenTime, err := postgres.GetLastOpenTime(db, pair+"-F", string(cfg.TimeFrame))
 		if err != nil {
-			log.Println(err, "use given start time")
+			log.Println(err, pair, "use given start time")
 			lastOpenTime = time.UnixMilli(int64(cfg.StartDate)).Add(-time.Second) // sub one sec since it is going to be added
 		}
 		startTime := lastOpenTime.Add(time.Second) // should work for all candles (1m, 1d etc.)
